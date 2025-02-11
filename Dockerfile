@@ -2,16 +2,19 @@ FROM alpine
 
 WORKDIR /opt/app
 
-RUN apk add --no-cache nodejs curl tzdata
+RUN apk add --no-cache nodejs curl tzdata unzip
 
 ENV TIME_ZONE=Asia/Shanghai 
 
 RUN cp /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone
 
-# RUN apk del tzdata
+# 添加构建参数，用于缓存破坏。每次构建时传入不同的值即可保证重新下载最新代码。
+ARG CACHEBUST=1
 
-ADD https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store.bundle.js /opt/app/sub-store.bundle.js
+# 使用 curl 拉取最新的 sub-store.bundle.js，加上缓存破坏参数，确保每次构建时都重新下载
+RUN curl -L "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store.bundle.js?cachebust=${CACHEBUST}" -o /opt/app/sub-store.bundle.js
 
+# 其余部分保持原有逻辑
 ADD https://github.com/sub-store-org/Sub-Store-Front-End/releases/latest/download/dist.zip /opt/app/dist.zip
 
 RUN unzip dist.zip; mv dist frontend; rm dist.zip
