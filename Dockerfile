@@ -2,30 +2,27 @@ FROM alpine
 
 WORKDIR /opt/app
 
-RUN apk add --no-cache nodejs curl tzdata unzip jq
+RUN apk add --no-cache nodejs curl tzdata
 
-ENV TIME_ZONE=Asia/Shanghai
+ENV TIME_ZONE=Asia/Shanghai 
 
 RUN cp /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone
 
-# 添加 GitHub token 来避免频繁退出
-ARG GITHUB_TOKEN
-RUN curl -L -H "Authorization: token ${GITHUB_TOKEN}" "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store.bundle.js" -o /opt/app/sub-store.bundle.js
+# RUN apk del tzdata
 
-# 使用 GitHub API 获取最新版本的下载链接
-RUN version=$(curl -s https://api.github.com/repos/sub-store-org/Sub-Store/releases/latest | jq -r .tag_name) && \
-    curl -L "https://github.com/sub-store-org/Sub-Store/releases/download/$version/sub-store.bundle.js" -o /opt/app/sub-store.bundle.js
+ADD https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store.bundle.js /opt/app/sub-store.bundle.js
 
-# 继续下载其他文件
-COPY dist.zip /opt/app/dist.zip
-COPY http-meta.bundle.js /opt/app/http-meta.bundle.js
-COPY tpl.yaml /opt/app/http-meta/tpl.yaml
+ADD https://github.com/sub-store-org/Sub-Store-Front-End/releases/latest/download/dist.zip /opt/app/dist.zip
 
 RUN unzip dist.zip; mv dist frontend; rm dist.zip
 
-RUN version_mihomo=$(curl -s -L --connect-timeout 5 --max-time 10 --retry 2 --retry-delay 0 --retry-max-time 20 'https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt') && \
+ADD https://github.com/xream/http-meta/releases/latest/download/http-meta.bundle.js /opt/app/http-meta.bundle.js
+
+ADD https://github.com/xream/http-meta/releases/latest/download/tpl.yaml /opt/app/http-meta/tpl.yaml
+
+RUN version=$(curl -s -L --connect-timeout 5 --max-time 10 --retry 2 --retry-delay 0 --retry-max-time 20 'https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt') && \
   arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64-compatible/) && \
-  url="https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-$arch-$version_mihomo.gz" && \
+  url="https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-$arch-$version.gz" && \
   curl -s -L --connect-timeout 5 --max-time 10 --retry 2 --retry-delay 0 --retry-max-time 20 "$url" -o /opt/app/http-meta/http-meta.gz && \
   gunzip /opt/app/http-meta/http-meta.gz && \
   rm -rf /opt/app/http-meta/http-meta.gz
