@@ -16,7 +16,7 @@ ADD https://github.com/sub-store-org/Sub-Store-Front-End/releases/latest/downloa
 
 RUN unzip dist.zip; mv dist frontend; rm dist.zip
 
-ADD https://github.com/sub-store-org/Sub-Store/blob/master/backend/bundle.js
+ADD https://github.com/xream/http-meta/releases/latest/download/http-meta.bundle.js /opt/app/http-meta.bundle.js
 
 ADD https://github.com/xream/http-meta/releases/latest/download/tpl.yaml /opt/app/http-meta/tpl.yaml
 
