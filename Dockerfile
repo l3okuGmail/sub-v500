@@ -10,7 +10,7 @@ RUN cp /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/t
 
 # RUN apk del tzdata
 
-ADD https://substore.v6oo.eu.org/sub-store.bundle.js /opt/app/sub-store.bundle.js
+ADD https://github.com/sub-store-org/Sub-Store/releases/download/2.16.55/sub-store.bundle.js
 
 ADD https://github.com/sub-store-org/Sub-Store-Front-End/releases/latest/download/dist.zip /opt/app/dist.zip
 
